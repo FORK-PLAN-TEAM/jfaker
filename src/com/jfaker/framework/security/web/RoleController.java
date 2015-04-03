@@ -18,6 +18,7 @@ package com.jfaker.framework.security.web;
 
 import java.util.List;
 
+import com.jfaker.app.AppConfig;
 import com.jfaker.framework.security.model.Authority;
 import com.jfaker.framework.security.model.Role;
 import com.jfaker.framework.security.web.validate.RoleValidator;
@@ -33,7 +34,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 public class RoleController extends Controller {
 	public void index() {
 		keepPara();
-		setAttr("page", Role.dao.paginate(getParaToInt("pageNo", 1), 10, getPara("name")));
+		setAttr("page", Role.dao.paginate(getParaToInt("pageNo", 1), AppConfig.props.getInt("jdbc.pageSize",15), getPara("name")));
 		render("roleList.jsp");
 	}
 	

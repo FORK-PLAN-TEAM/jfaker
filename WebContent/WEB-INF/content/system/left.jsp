@@ -47,6 +47,10 @@
 				ele.css("display","none");
 			}
 		});
+		$('div.sidebar').height($(window).height()-15);
+		$(window).resize(function(){
+			$('div.sidebar').height($(window).height()-15);
+		});
 	});
 	function Show_left() {
 	if (document.getElementById("oaleft").style.display == "none") {

@@ -16,6 +16,7 @@
  */
 package com.jfaker.framework.security.web;
 
+import com.jfaker.app.AppConfig;
 import com.jfaker.framework.security.model.Resource;
 import com.jfaker.framework.security.web.validate.ResourceValidator;
 import com.jfinal.aop.Before;
@@ -29,7 +30,7 @@ import com.jfinal.core.Controller;
 public class ResourceController extends Controller {
 	public void index() {
 		keepPara();
-		setAttr("page", Resource.dao.paginate(getParaToInt("pageNo", 1), 10, getPara("name")));
+		setAttr("page", Resource.dao.paginate(getParaToInt("pageNo", 1), AppConfig.props.getInt("jdbc.pageSize",15), getPara("name")));
 		render("resourceList.jsp");
 	}
 	
@@ -49,7 +50,8 @@ public class ResourceController extends Controller {
 	
 	@Before(ResourceValidator.class)
 	public void save() {
-		getModel(Resource.class).save();
+		Resource res = getModel(Resource.class);
+		res.save();
 		redirect("/security/resource");
 	}
 	

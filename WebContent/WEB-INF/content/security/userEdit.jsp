@@ -50,15 +50,15 @@
 						<span>账号：</span>
 					</td>
 					<td class="td_table_2">
-						<input type="text" class="input_240" id="username" name="user.username"
-							value="${user.username }" />
+						<input type="text" class="input_240" id="username" name="user.username" readonly="readonly"
+							value="${user.username }" />${usernameMsg}
 					</td>
 					<td class="td_table_1">
 						<span>姓名：</span>
 					</td>
 					<td class="td_table_2">
 						<input type="text" class="input_240" id="fullname" name="user.fullname"
-							value="${user.fullname }" />
+							value="${user.fullname }" />${fullnameMsg}
 					</td>
 				</tr>
 				<tr>
@@ -67,14 +67,14 @@
 					</td>
 					<td class="td_table_2">
 						<input type="password" class="input_240" id="plainPassword" name="user.plainPassword"
-							value="${user.plainPassword }" />
+							value="" />
 					</td>
 					<td class="td_table_1">
 						<span>确认密码：</span>
 					</td>
 					<td class="td_table_2">
 						<input type="password" class="input_240" id="passwordConfirm"
-							name="passwordConfirm" value="${user.plainPassword }" />
+							name="passwordConfirm" value="" />${passwordMsg}
 					</td>
 				</tr>
 				<tr>
@@ -142,7 +142,7 @@
 							</label>
 						</td>
 						<td class="td_list_2" align=left nowrap>
-							${role.name}&nbsp;
+							${role.description} - ${role.name}&nbsp;
 						</td>
 					</tr>
 				</c:forEach>

@@ -16,6 +16,7 @@
  */
 package com.jfaker.framework.config.model;
 
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Model;
 
 /**
@@ -30,4 +31,8 @@ public class Field extends Model<Field> {
 	private static final long serialVersionUID = -4586203764519670303L;
 	public static final String FLOW = "1";
 	public static final Field dao = new Field();
+	
+	public void deleteByFormId(int id){
+		Db.update("delete from DF_FIELD where formid=?", id);
+	}
 }

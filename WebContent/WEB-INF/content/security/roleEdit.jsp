@@ -84,7 +84,7 @@
 							</label>
 						</td>
 						<td class="td_list_2" align=left nowrap>
-							${authority.name}&nbsp;
+							${authority.description} - ${authority.name}&nbsp;
 						</td>
 					</tr>
 				</c:forEach>

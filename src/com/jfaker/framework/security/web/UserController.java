@@ -25,6 +25,7 @@ import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 
+import com.jfaker.app.AppConfig;
 import com.jfaker.framework.security.model.Role;
 import com.jfaker.framework.security.model.User;
 import com.jfaker.framework.security.web.validate.UserValidator;
@@ -42,7 +43,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 public class UserController extends Controller {
 	public void index() {
 		User user = getModel(User.class);
-		Page<User> page = User.dao.paginate(getParaToInt("pageNo", 1), 10, user);
+		Page<User> page = User.dao.paginate(getParaToInt("pageNo", 1), AppConfig.props.getInt("jdbc.pageSize",15), user);
 		setAttr("page", page);
 		keepModel(User.class);
 		render("userList.jsp");

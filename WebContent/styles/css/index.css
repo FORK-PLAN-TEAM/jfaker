@@ -112,19 +112,19 @@ a:hover {
 a:active {
 	color: #FF6600;
 }
-
+html, body{ margin:0; height:100%; }
 .sidebar {
 	border: 1px solid #BCD2E9;
 	box-shadow: 0 1px 1px rgba(196, 213, 224, 0.5);
-	width: 210px;
-	height: 500px;
-	margin: 5px auto 0;
+	width: 170px;
+	margin: 5px;
 	overflow:auto;
+	overflow-x:hidden;
 }
 
 .sidebar dl {
-	margin: 8px auto 16px;
-	width: 210px;
+	margin: 5px auto;
+	width: 180px;
 	text-align: left;
 }
 
@@ -166,7 +166,7 @@ a:active {
 
 .sidebar dd a:hover {
 	background-color: #DFF4FF;
-	color: #333;
+	color: #4384b7;
 	text-decoration: none;
 }
 

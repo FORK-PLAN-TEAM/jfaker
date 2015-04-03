@@ -46,14 +46,12 @@ public class ShiroPlugin implements IPlugin {
 			if(StringUtils.isEmpty(source)) {
 				continue;
 			}
-			if(source.indexOf(";") != -1) {
-				String[] sources = source.split(";");
-				for(String singleSource : sources) {
-					createChain(manager, singleSource, authority);
-				}
-			} else {
-				createChain(manager, source, authority);
+
+			String[] sources = source.split("\n");//原来是用分号分隔的，我为了迎合后台管理的视觉习惯（一行一条记录）
+			for(String singleSource : sources) {
+				createChain(manager, singleSource.trim(), authority);
 			}
+			
 		}
 		manager.createChain("/**", "user");
 		return true;

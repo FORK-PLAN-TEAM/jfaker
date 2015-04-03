@@ -59,16 +59,9 @@
 					<td class="td_table_1">
 						<span>资源名称：</span>
 					</td>
-					<td class="td_table_2">
+					<td colspan="3" class="td_table_2">
 						<input type="text" class="input_240" id="name" name="resource.name"
 							value="${resource.name }" />
-					</td>
-					<td class="td_table_1">
-						<span>资源值：</span>
-					</td>
-					<td class="td_table_2">
-						<input type="text" class="input_240" id="source" name="resource.source"
-							value="${resource.source }" />
 					</td>
 				</tr>
  				<tr>
@@ -78,13 +71,22 @@
 					<td class="td_table_2" colspan="3">
 						<input type="hidden" id="parentMenuId" name="resource.menu" value="${resource.menu }">
 						<input type="text" id="parentMenuName" readonly="readonly" name="parentMenuName" class="input_240" value="${resource.menuName }">
-						<input type='button' class='button_70px' value='选择菜单' id="selectMenu" onclick="openMenu()"/>
+						<input type='button' class='button_70px' value='选择菜单' id="selectMenu" onClick="openMenu()"/>
 					</td>
+				</tr>
+                <tr>
+					<td class="td_table_1">
+						<span>资源值：<br/>（一个资源值为一行）</span>
+					</td>
+					<td class="td_table_2">
+						
+						<textarea class="input_textarea_320" id="source" name="resource.source" cols="45" rows="5">${resource.source }</textarea>
+				    </td>
 				</tr>
 			</table>
 			<table align="center" border="0" cellpadding="0"
 				cellspacing="0">
-				<tr align="left">
+  <tr align="left">
 					<td colspan="1">
 						<input type="submit" class="button_70px" name="submit" value="提交">
 						&nbsp;&nbsp;

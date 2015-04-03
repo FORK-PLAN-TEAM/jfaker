@@ -56,8 +56,10 @@ import com.jfinal.config.Plugins;
 import com.jfinal.config.Routes;
 import com.jfinal.core.JFinal;
 import com.jfinal.ext.handler.ContextPathHandler;
+import com.jfinal.kit.Prop;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
-import com.jfinal.plugin.c3p0.C3p0Plugin;
+import com.jfinal.plugin.activerecord.CaseInsensitiveContainerFactory;
+import com.jfinal.plugin.activerecord.dialect.OracleDialect;
 import com.jfinal.render.ViewType;
 
 /**
@@ -66,15 +68,16 @@ import com.jfinal.render.ViewType;
  * @since 0.1
  */
 public class AppConfig extends JFinalConfig {
+	public static Prop props;
 	/**
 	 * 配置常量
 	 */
 	public void configConstant(Constants me) {
 		loadPropertyFile("jfinal.properties");
-		me.setDevMode(getPropertyToBoolean("devMode", false));
+		me.setDevMode(getPropertyToBoolean("devMode", true));
 //	    me.setError404View("/common/404.jsp");
 //	    me.setError500View("/common/500.jsp");
-	    
+		props=this.prop;
 	    me.setViewType(ViewType.JSP);
 	    me.setBaseViewPath("WEB-INF/content/");
 	}
@@ -111,14 +114,32 @@ public class AppConfig extends JFinalConfig {
 	 */
 	public void configPlugin(Plugins me) {
 		// 配置C3p0数据库连接池插件
-		C3p0Plugin c3p0Plugin = new C3p0Plugin(getProperty("jdbcUrl"), getProperty("user"), getProperty("password").trim());
+		MyC3p0Plugin c3p0Plugin = new MyC3p0Plugin(
+				getProperty("jdbcUrl").trim(),
+				getProperty("user").trim(), 
+				getProperty("password").trim(),
+				getProperty("driver").trim());
+		//c3p0Plugin.setMinPoolSize(2);
+		//c3p0Plugin.setInitialPoolSize(2);
+		
+		c3p0Plugin.setPreferredTestQuery("select 1 from dual");
 		me.add(c3p0Plugin);
 		
 		ScriptsPlugin scriptsPlugin = new ScriptsPlugin(c3p0Plugin);
 		me.add(scriptsPlugin);
 		
+		
 		// 配置ActiveRecord插件
 		ActiveRecordPlugin arp = new ActiveRecordPlugin(c3p0Plugin);
+		
+		arp.setShowSql(true);
+		//设置方言
+		arp.setDialect(new OracleDialect());
+				
+		//设置Oracle大小写不敏感
+		arp.setContainerFactory(new CaseInsensitiveContainerFactory());
+		
+		
 		me.add(arp);
 		arp.addMapping("sec_user", User.class);
 		arp.addMapping("sec_org", Org.class);
@@ -160,6 +181,6 @@ public class AppConfig extends JFinalConfig {
 	}
 	
 	public static void main(String[] args) {
-		JFinal.start("WebContent", 8889, "/jfaker", 5);
+		JFinal.start("WebContent", 8080, "/jflow", 5);
 	}
 }

@@ -16,6 +16,7 @@
  */
 package com.jfaker.framework.security.web;
 
+import com.jfaker.app.AppConfig;
 import com.jfaker.framework.security.model.Org;
 import com.jfaker.framework.security.web.validate.OrgValidator;
 import com.jfinal.aop.Before;
@@ -29,7 +30,7 @@ import com.jfinal.core.Controller;
 public class OrgController extends Controller {
 	public void index() {
 		keepPara();
-		setAttr("page", Org.dao.paginate(getParaToInt("pageNo", 1), 10, getPara("name")));
+		setAttr("page", Org.dao.paginate(getParaToInt("pageNo", 1), AppConfig.props.getInt("jdbc.pageSize",15), getPara("name")));
 		render("orgList.jsp");
 	}
 	
@@ -49,7 +50,8 @@ public class OrgController extends Controller {
 	
 	@Before(OrgValidator.class)
 	public void save() {
-		getModel(Org.class).save();
+		Org model = getModel(Org.class);
+		model.save();
 		redirect("/security/org");
 	}
 	

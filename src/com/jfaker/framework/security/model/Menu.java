@@ -50,7 +50,7 @@ public class Menu extends Model<Menu> {
 	}
 	
 	public Menu get(int id) {
-		return Menu.dao.findFirst("select m.*,pm.id as parentId, pm.name as parentName from sec_menu m inner join sec_menu pm on m.parent_menu=pm.id where m.id=?", id);
+		return Menu.dao.findFirst("select m.*,pm.id as parentId, pm.name as parentName from sec_menu m left join sec_menu pm on m.parent_menu=pm.id where m.id=?", id);
 	}
 	
 	public List<Menu> getAllowedAccessMenus(Integer userId) {

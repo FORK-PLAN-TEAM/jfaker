@@ -17,12 +17,17 @@
 package com.jfaker.framework.config.web;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.snaker.engine.helper.JsonHelper;
 
+import com.jfaker.app.AppConfig;
 import com.jfaker.framework.flow.web.SnakerController;
 import com.jfaker.framework.config.model.Field;
 import com.jfaker.framework.config.model.Form;
@@ -37,9 +42,10 @@ import com.jfinal.plugin.activerecord.tx.Tx;
  * @since 0.1
  */
 public class FormController extends SnakerController {
+	private static final Logger log = LoggerFactory.getLogger(FormController.class);
 	public void index() {
 		String name = getPara("name");
-		setAttr("page", Form.dao.paginate(getParaToInt("pageNo", 1), 10, name));
+		setAttr("page", Form.dao.paginate(getParaToInt("pageNo", 1), AppConfig.props.getInt("jdbc.pageSize",15), name));
 		keepPara();
 		render("formList.jsp");
 	}
@@ -78,33 +84,35 @@ public class FormController extends SnakerController {
 	}
 	
 	@SuppressWarnings("unchecked")
+	@Before(Tx.class)
 	public void processor() {
 		Form model = null;
-		try {
-			model = Form.dao.findById(getParaToInt("formid"));
-			Map<String, Object> map = JsonHelper.fromJson(getPara("parse_form"), Map.class);
-			Map<String, Object> datas = (Map<String, Object>)map.get("add_fields");
-			Map<String, String> nameMap = Form.dao.process(model, datas);
-			String template = (String)map.get("template");
-			String parseHtml = (String)map.get("parse");
-			if(!nameMap.isEmpty()) {
-				for(Map.Entry<String, String> entry : nameMap.entrySet()) {
-					template = template.replaceAll(entry.getKey(), entry.getValue());
-					parseHtml = parseHtml.replaceAll(entry.getKey(), entry.getValue());
-				}
+		
+		model = Form.dao.findById(getParaToInt("formid"));
+		Map<String, Object> map = JsonHelper.fromJson(getPara("parse_form"), Map.class);
+		Map<String, Object> datas = (Map<String, Object>)map.get("add_fields");
+		Map<String, String> nameMap = Form.dao.process(model, datas);
+		String template = (String)map.get("template");
+		String parseHtml = (String)map.get("parse");
+		if(!nameMap.isEmpty()) {
+			for(Map.Entry<String, String> entry : nameMap.entrySet()) {
+				template = template.replaceAll(entry.getKey(), entry.getValue());
+				parseHtml = parseHtml.replaceAll(entry.getKey(), entry.getValue());
 			}
-			model.set("originalHtml", template);
-			model.set("parseHtml", parseHtml);
-			model.update();
-			renderJson(Boolean.TRUE);
-		} catch(Exception e) {
-			e.printStackTrace();
-			renderJson(Boolean.FALSE);
 		}
-	}
+		model.set("originalHtml", template);
+		model.set("parseHtml", parseHtml);
+		model.update();
+		renderJson(Boolean.TRUE);
 	
+	}
+	/**
+	 * 不删除新建的表及数据
+	 */
+	@Before(Tx.class)
 	public void delete() {
 		Form.dao.deleteById(getParaToInt());
+		Field.dao.deleteByFormId(getParaToInt());
 		redirect("/config/form");
 	}
 	

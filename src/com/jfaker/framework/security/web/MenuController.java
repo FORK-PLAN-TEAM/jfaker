@@ -16,6 +16,7 @@
  */
 package com.jfaker.framework.security.web;
 
+import com.jfaker.app.AppConfig;
 import com.jfaker.framework.security.model.Menu;
 import com.jfaker.framework.security.web.validate.MenuValidator;
 import com.jfinal.aop.Before;
@@ -29,7 +30,7 @@ import com.jfinal.core.Controller;
 public class MenuController extends Controller {
 	public void index() {
 		keepPara();
-		setAttr("page", Menu.dao.paginate(getParaToInt("pageNo", 1), 10, getPara("name")));
+		setAttr("page", Menu.dao.paginate(getParaToInt("pageNo", 1), AppConfig.props.getInt("jdbc.pageSize",15), getPara("name")));
 		render("menuList.jsp");
 	}
 	
@@ -49,7 +50,8 @@ public class MenuController extends Controller {
 	
 	@Before(MenuValidator.class)
 	public void save() {
-		getModel(Menu.class).save();
+		Menu model = getModel(Menu.class);
+		model.save();
 		redirect("/security/menu");
 	}
 	

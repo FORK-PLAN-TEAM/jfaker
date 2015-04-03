@@ -47,7 +47,7 @@ public class Org extends Model<Org> {
 	}
 	
 	public Org get(Integer id) {
-		return Org.dao.findFirst("select o.*,po.id as parentId, po.name as parentName from sec_org o inner join sec_org po on o.parent_org=po.id where o.id=?", id);
+		return Org.dao.findFirst("select o.*,po.id as parentId, po.name as parentName from sec_org o left join sec_org po on o.parent_org=po.id where o.id=?", id);
 	}
 	
 	public List<Org> getByParent(Integer parentId) {

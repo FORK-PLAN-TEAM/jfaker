@@ -75,12 +75,14 @@
 								$it.find('.wBox_close').click(_this.close);
 								fH = $it.height();//iframe height
 								fW = $it.width();
+								
 								w = $win;
 								newW = Math.min(w.width() - 40, fW);
 								newH = w.height() - 25 - (_this.YQ.noTitle ? 0 : 30);
 								newH = Math.min(newH, fH);
 								if (!newH) 
 									return;
+								if(newH<300) newH=fH; //设置最小高度，防止出现高度过小导致不能正常显示
 								var lt = calPosition(newW);
 								C.css({
 									left: lt[0],

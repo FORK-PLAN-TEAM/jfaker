@@ -18,8 +18,10 @@ package com.jfaker.framework.security.web;
 
 import java.util.List;
 
+import com.jfaker.app.AppConfig;
 import com.jfaker.framework.security.model.Authority;
 import com.jfaker.framework.security.model.Resource;
+import com.jfaker.framework.security.shiro.ShiroPlugin;
 import com.jfaker.framework.security.web.validate.AuthorityValidator;
 import com.jfinal.aop.Before;
 import com.jfinal.core.Controller;
@@ -33,7 +35,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 public class AuthorityController extends Controller {
 	public void index() {
 		keepPara();
-		setAttr("page", Authority.dao.paginate(getParaToInt("pageNo", 1), 10, getPara("name")));
+		setAttr("page", Authority.dao.paginate(getParaToInt("pageNo", 1), AppConfig.props.getInt("jdbc.pageSize",15), getPara("name")));
 		render("authorityList.jsp");
 	}
 	
@@ -100,6 +102,17 @@ public class AuthorityController extends Controller {
 		Authority.dao.deleteCascade(getParaToInt());
 		Authority.dao.deleteById(getParaToInt());
 		redirect("/security/authority");
+	}
+	
+	/**
+	 * 在后台修改过资源、权限、角色等配置信息，可以通过此方法在线加载，否则就要重启应用
+	 */
+	public void reloadAuthority(){
+		ShiroPlugin sp=new ShiroPlugin();
+		if(sp.start()){
+			setAttr("msg", "成功重新载入权限配置！");
+		}
+		render("../common-info.jsp");
 	}
 }
 

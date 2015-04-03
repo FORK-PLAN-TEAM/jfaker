@@ -16,6 +16,7 @@
  */
 package com.jfaker.framework.config.web;
 
+import com.jfaker.app.AppConfig;
 import com.jfaker.framework.config.model.Dict;
 import com.jfaker.framework.config.model.DictItem;
 import com.jfinal.aop.Before;
@@ -30,7 +31,7 @@ import com.jfinal.plugin.activerecord.tx.Tx;
 public class DictController extends Controller {
 	public void index() {
 		String name = getPara("name");
-		setAttr("page", Dict.dao.paginate(getParaToInt("pageNo", 1), 10, name));
+		setAttr("page", Dict.dao.paginate(getParaToInt("pageNo", 1), AppConfig.props.getInt("jdbc.pageSize",15), name));
 		setAttr("name", name);
 		render("dictList.jsp");
 	}
@@ -68,7 +69,7 @@ public class DictController extends Controller {
 			ci.set("dictionary", model.get("id"));
 			ci.save();
 		}
-		redirect("/security/dict");
+		redirect("/config/dictionary");
 	}
 	
 	@Before(Tx.class)
@@ -88,12 +89,12 @@ public class DictController extends Controller {
 			ci.set("dictionary", model.get("id"));
 			ci.save();
 		}
-		redirect("/security/dict");
+		redirect("/config/dictionary");
 	}
 	
 	public void delete() {
 		Dict.dao.deleteById(getParaToInt());
-		redirect("/security/dict");
+		redirect("/config/dictionary");
 	}
 }
 

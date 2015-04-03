@@ -16,6 +16,8 @@
  */
 package com.jfaker.framework.config.model;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jfaker.framework.utils.DateUtils;
 import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.ICallback;
 import com.jfinal.plugin.activerecord.Model;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
@@ -76,52 +79,80 @@ public class Form extends Model<Form> {
 			fields.add(field);
 			nameMap.put(entry.getKey(), fieldInfo.get("fieldname"));
 		}
+		log.info("fields size:"+fields.size());
 		model.set("fieldNum", model.getBigDecimal("fieldNum").intValue() + fields.size());
 		String check = "select count(*) from " + tableName + " where id = 1";
 		boolean isExists = true;
 		try {
-			Db.queryLong(check);
+			Db.queryBigDecimal(check);
 		} catch(Exception e) {
 			isExists = false;
 		}
+		
 		StringBuilder sql = new StringBuilder();
-		try {
-			List<String> fieldNames = Db.query("select name from df_field where tableName=?", tableName);
-			if(!isExists) {
-				sql.append("CREATE TABLE ").append(tableName).append(" (");
-				sql.append("ID INT NOT NULL AUTO_INCREMENT,");
-				for(Field field : fields) {
-					sql.append(field.getStr("name"));
-					sql.append(" ").append(fieldSQL(field)).append(",");
-				}
+		
+		List<String> fieldNames = Db.query("select name from df_field where tableName=?", tableName);
+		if(!isExists) {
+			sql.append("CREATE TABLE ").append(tableName).append(" (");
+			sql.append("ID number not null primary key,");
+			for(Field field : fields) {
+				sql.append(field.getStr("name"));
+				sql.append(" ").append(fieldSQL(field)).append(",");
+			}
 
-				sql.append("FORMID INT NOT NULL,");
-				sql.append("UPDATETIME VARCHAR(20),");
-				sql.append("ORDERID VARCHAR(50),");
-				sql.append("TASKID  VARCHAR(50),");
-				sql.append("PRIMARY KEY (ID)");
-				sql.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-				Db.update(sql.toString());
-			} else {
-				if(fields.size() > 0) {
-					for(Field field : fields) {
-						if(StringUtils.isNotEmpty(field.getStr("name")) && 
-								!fieldNames.contains(field.getStr("name"))) {
-							Db.update("ALTER TABLE " + tableName + " ADD COLUMN " + field.getStr("name") + fieldSQL(field));
-						}
+			sql.append("FORMID number NOT NULL,");
+			sql.append("UPDATETIME VARCHAR(20),");
+			sql.append("ORDERID VARCHAR(50),");
+			sql.append("TASKID  VARCHAR(50)");
+			sql.append(")");
+			Db.update(sql.toString());
+			
+			//针对Oracle，创建触发器和序列
+			sql.delete(0, sql.length());
+			sql.append("CREATE SEQUENCE SEQ_"+tableName+" ");
+			sql.append("INCREMENT BY 1 ");
+			sql.append("START WITH 1 ");
+			sql.append("MAXVALUE 9999999999999999999999999999 ");
+			sql.append("NOMINVALUE ");
+			sql.append("NOCYCLE ");
+			sql.append("CACHE 20 ");
+			sql.append("NOORDER");
+			Db.update(sql.toString());
+			
+			sql.delete(0, sql.length());
+			sql.append("CREATE OR REPLACE TRIGGER TRIGGER_"+tableName+" ");
+			sql.append("before insert on "+tableName+" ");
+			sql.append("for each row ");
+			sql.append("begin ");
+			sql.append("select SEQ_"+tableName+".nextval into :new.ID from dual;");
+			sql.append("end;");
+			Db.execute(new ICallback() {
+				
+				@Override
+				public Object call(Connection conn) throws SQLException {
+					// TODO Auto-generated method stub
+					conn.createStatement().execute(sql.toString());
+					return "ok";
+				}
+			});
+			
+		} else {
+			
+			if(fields.size() > 0) {
+				for(Field field : fields) {
+					if(StringUtils.isNotEmpty(field.getStr("name")) && 
+							!fieldNames.contains(field.getStr("name"))) {
+						Db.update("ALTER TABLE " + tableName + " ADD ( " + field.getStr("name") + fieldSQL(field)+")");
 					}
 				}
 			}
-			
-			for(Field field : fields) {
-				if(!fieldNames.contains(field.getStr("name"))) {
-					field.save();
-				}
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
 		}
+		for(Field field : fields) {
+			if(!fieldNames.contains(field.getStr("name"))) {
+				field.save();
+			}
+		}
+		
 		return nameMap;
 	}
 	
@@ -211,18 +242,18 @@ public class Form extends Model<Form> {
         } else if(plugins.equalsIgnoreCase("text")) {
         	String type = field.getStr("type");
         	if("text".equals(type)) {
-        		return " VARCHAR(255) NOT NULL DEFAULT ''";
+        		return " VARCHAR(255) NOT NULL ";
         	} else if("int".equals(type)) {
-        		return " INT NOT NULL DEFAULT 0";
+        		return " number DEFAULT 0 NOT NULL";
         	} else if("float".equals(type)) {
         		return " FLOAT ";
         	} else {
-        		return " VARCHAR(255) NOT NULL DEFAULT ''";
+        		return " VARCHAR(255) DEFAULT '' NOT NULL";
         	}
         } else if(plugins.equalsIgnoreCase("radios")) {
-            return " VARCHAR(255) NOT NULL DEFAULT ''";
+            return " VARCHAR(255) DEFAULT '' NOT NULL";
         } else {
-            return " VARCHAR(255) NOT NULL DEFAULT ''";
+            return " VARCHAR(255) DEFAULT '' NOT NULL";
         }
 	}
 }
